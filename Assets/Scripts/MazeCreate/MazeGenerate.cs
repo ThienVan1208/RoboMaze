@@ -29,6 +29,7 @@ public class MazeGenerate : MonoBehaviour
         }
 
         GenerateMaze(null, _mazeGrid[0, 0]);
+        OptimizeMaze();
     }
 
     private void GenerateMaze(MazeCell previousCell, MazeCell currentCell)
@@ -135,6 +136,49 @@ public class MazeGenerate : MonoBehaviour
             previousCell.ClearBackWall();
             currentCell.ClearFrontWall();
             return;
+        }
+    }
+    void OptimizeMaze()
+    {
+        for (int x = 0; x < _mazeWidth; x++)
+        {
+            for (int z = 0; z < _mazeDepth; z++)
+            {
+                // Check front
+                if(z + 1 < _mazeDepth)
+                {
+                    if(_mazeGrid[x, z].f && _mazeGrid[x, z + 1].b)
+                    {
+                        _mazeGrid[x, z].ClearFrontWall();
+                    }
+                }
+                // Check Back
+                if (z - 1 >= 0)
+                {
+                    if (_mazeGrid[x, z].b && _mazeGrid[x, z - 1].f)
+                    {
+                        _mazeGrid[x, z].ClearBackWall();
+                    }
+                }
+
+                // Check right
+                if (x + 1 < _mazeWidth)
+                {
+                    if (_mazeGrid[x, z].r && _mazeGrid[x + 1, z].l)
+                    {
+                        _mazeGrid[x, z].ClearRightWall();
+                    }
+                }
+                // Check left
+                if (x - 1 >= 0)
+                {
+                    if (_mazeGrid[x, z].l && _mazeGrid[x - 1, z].r)
+                    {
+                        _mazeGrid[x, z].ClearLeftWall();
+                    }
+                }
+
+            }
         }
     }
 

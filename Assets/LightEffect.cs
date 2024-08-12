@@ -7,6 +7,7 @@ public class LightEffect : MonoBehaviour
     // Start is called before the first frame update
     public Light light_effect;
     public Coroutine currCo;
+    public GameObject player;
     void Start()
     {
         
@@ -22,7 +23,7 @@ public class LightEffect : MonoBehaviour
     }
     public IEnumerator LightOnOff()
     {
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(2f);
         light_effect.color = Color.white;
         yield return new WaitForSeconds(0.2f);
         light_effect.color = Color.black;

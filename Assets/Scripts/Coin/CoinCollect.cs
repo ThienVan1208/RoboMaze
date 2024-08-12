@@ -20,7 +20,7 @@ public class CoinCollect : MonoBehaviour
         if(other.gameObject.CompareTag("Player"))
         {
             GameManager.Instance.score++;
-            Destroy(gameObject);
+            gameObject.SetActive(false);
         }
     }
 }

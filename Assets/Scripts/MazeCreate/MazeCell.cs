@@ -22,12 +22,13 @@ public class MazeCell : MonoBehaviour
     public GameObject coin;
     public GameObject player;
 
+    public bool l = true, r = true, f = true, b = true;
     public bool IsVisited { get; private set; }
 
     public void Visit()
     {
         IsVisited = true;
-        _unvisitedBlock.SetActive(false);
+        Destroy(_unvisitedBlock);
         if (gameObject.transform.position == Vector3.zero)
         {
             Instantiate(coin, _unvisitedBlock.transform.position, Quaternion.identity);
@@ -40,21 +41,25 @@ public class MazeCell : MonoBehaviour
 
     public void ClearLeftWall()
     {
-        _leftWall.SetActive(false);
+        l = false;
+        Destroy(_leftWall);
     }
 
     public void ClearRightWall()
     {
-        _rightWall.SetActive(false);
+        r = false;
+        Destroy(_rightWall);
     }
 
     public void ClearFrontWall()
     {
-        _frontWall.SetActive(false);
+        f = false;
+        Destroy(_frontWall);
     }
 
     public void ClearBackWall()
     {
-        _backWall.SetActive(false);
+        b = false;
+        Destroy(_backWall);
     }
 }

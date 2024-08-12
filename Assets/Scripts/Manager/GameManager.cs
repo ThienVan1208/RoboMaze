@@ -11,13 +11,16 @@ public class GameManager : MonoBehaviour
     public int score;
     public TextMeshProUGUI textScore;
     public GameObject player;
-    public GameObject WinPanel, OverPanel;
-    private Coroutine curCo = null;
+    public GameObject WinPanel, OverPanel;// skipButton;
+    private Coroutine curCo = null, camRevCo = null;
     public ghost[] enemy;
     public GameObject instructPanel;
-    public GameObject displayPanel;
+    private GameObject displayPanel;
     public GameObject[] panelRender;
     public Transform cam;
+
+    private bool skip;
+    private IEnumerator stopCam;
     public void Awake()
     {
         if (Instance == null)
@@ -36,7 +39,8 @@ public class GameManager : MonoBehaviour
         
         WinPanel.SetActive(false);
         displayPanel = panelRender[0];
-        StartCoroutine( ActiveInstruction());
+
+        StartCoroutine(ActiveInstruction());
         
     }
 
@@ -44,19 +48,12 @@ public class GameManager : MonoBehaviour
     {
         DisplayScore();
         WinGame();
+        
     }
 
-    public void WinGame()
-    {
-        if (score == 99)
-        {
-            if (curCo == null)
-            {
-                curCo = StartCoroutine(Win());
-            }
-        }
-    }
+    
 
+    //OVER FUNC
     public void ActiveOverPanel()
     {
         StopGhost();
@@ -85,6 +82,18 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 
     }
+
+    //WIN FUNC
+    public void WinGame()
+    {
+        if (score == 99)
+        {
+            if (curCo == null)
+            {
+                curCo = StartCoroutine(Win());
+            }
+        }
+    }
     public IEnumerator Win()
     {
         move playerScript = player.GetComponent<move>();
@@ -96,6 +105,8 @@ public class GameManager : MonoBehaviour
         WinPanel.transform.Find("Win_window").DOScale(new Vector3(1f, 1f, 1f), 1f);
         playerScript.stopWin();
     }
+
+    //PLAY AGAIN FUNC
     public void AgainButton()
     {
         StartCoroutine(PlayAgain());
@@ -107,22 +118,28 @@ public class GameManager : MonoBehaviour
         WinPanel.SetActive(false);
         GameOver();
     }
+
+    // DISPLAY SCORE FUNC
     public void DisplayScore()
     {
         textScore.text = "Score : " + score.ToString();
     }
     
+
+    //INSTRUCTION FUNC
     public IEnumerator ActiveInstruction()
     {
        
         StopGhost();
         StopPlayer();
+        
         yield return new WaitForSeconds(1f);
         instructPanel.SetActive(true);
         displayPanel.transform.DOScale(new Vector3(1f, 1f, 1f), 1f);
     }
     public void InactiveInstruction()
     {
+        //skipButton.SetActive(true);
         displayPanel.transform.DOScale(new Vector3(0.1f, 0.1f, 0.1f), 1f);
         StartCoroutine(exit(instructPanel, 1f));
     }
@@ -130,24 +147,27 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(time);
         panel.SetActive(false);
-        StartCoroutine(CamReview());
+        stopCam = CamReview();
+        StartCoroutine(stopCam);
     }
-
+    // CAM REVIEW
     public IEnumerator CamReview()
     {
         cam.GetComponent<MoveCam>().cam_rev = true;
         for (int i = 0; i < enemy.Length; i++)
         {
-            cam.DOMove(new Vector3(enemy[i].transform.position.x, 4.5f, enemy[i].transform.position.z), 2f);
-            yield return new WaitForSeconds(2f);
+            cam.DOMove(new Vector3(enemy[i].transform.position.x, 4.5f, enemy[i].transform.position.z), 1f);
+            yield return new WaitForSeconds(1f);
         }
         cam.DOMove(new Vector3(player.transform.position.x, 4.5f, player.transform.position.z), 1f);
         yield return new WaitForSeconds(1f);
         cam.GetComponent<MoveCam>().cam_rev = false;
         MoveGhost();
         MovePlayer();
+        camRevCo = null;
     }
 
+    //STOP MOVE FUNC
     public void StopGhost()
     {
         for (int i = 0; i < enemy.Length; i++)
@@ -170,6 +190,8 @@ public class GameManager : MonoBehaviour
     {
         player.GetComponent<move>().canMove = true;
     }
+
+    // BUTTON CLICK
     public void NextButtonClick()
     {
         StartCoroutine(NextButton());
@@ -182,9 +204,6 @@ public class GameManager : MonoBehaviour
     {
         
         panelRender[1].SetActive(true);
-
-        
-        
         yield return new WaitForSeconds(0.01f);
         displayPanel = panelRender[1];
         panelRender[0].SetActive(false);
@@ -194,9 +213,37 @@ public class GameManager : MonoBehaviour
     {
         
         panelRender[0].SetActive(true);
-        
         yield return new WaitForSeconds(0.01f);
         displayPanel = panelRender[0];
         panelRender[1].SetActive(false);
     }
+
+    // SKIP INSTRUCTION
+    public void skipClick()
+    {
+        if (camRevCo != null)
+        {
+            skip = true;
+            
+        }
+        //if (skip)
+        //{
+        //    StopCoroutine("CamReview");
+        //    //StopCoroutine(CamReview());
+        //    camRevCo = null;
+        //}
+        cam.DOMove(new Vector3(player.transform.position.x, 4.5f, player.transform.position.z), 1f);
+        //skipButton.SetActive(false);
+        StartCoroutine(camModify());
+
+    }
+    IEnumerator camModify()
+    {
+        yield return new WaitForSeconds(1f);
+        MoveGhost();
+        MovePlayer();
+        cam.GetComponent<MoveCam>().cam_rev = false;
+        skip = false;
+    }
+
 }
